@@ -6,28 +6,55 @@ import java.util.Stack;
 public class GrammarRule {
 	private static ArrayList<GrammarRule> rules = new ArrayList<>();
 
-	private final String substitute;
-	private ArrayList<String> search = new ArrayList<String>();
+	private final String substituteTo;
+	private ArrayList<String> substituteWith = new ArrayList<String>();
 
+	/**
+	 * Make a new Grammar Rule with an initial substitute string and as many
+	 * search string as desired
+	 *
+	 * @param substitute
+	 * @param search
+	 */
 	public GrammarRule(String substitute, String... search) {
-		this.substitute = substitute;
+		this.substituteTo = substitute;
 		for (String s : search)
-			this.search.add(s);
+			this.substituteWith.add(s);
 		rules.add(this);
 	}
 
+	/**
+	 * Add String s to the list of search strings
+	 *
+	 * @param s
+	 */
 	public void addSearchString(String s) {
-		search.add(s);
+		substituteWith.add(s);
 	}
 
-	public static String getSubstitute(String s) {
+	/**
+	 * Check to see if String s should be substituted based on any existing
+	 * grammar rules made
+	 *
+	 * @param s
+	 *            the string to be substituted
+	 * @return the string that s gets substituted with
+	 */
+	private static String getSubstitute(String s) {
 		for (GrammarRule rule : rules)
-			for (String search : rule.search)
+			for (String search : rule.substituteWith)
 				if (s.equals(search))
-					return rule.substitute;
+					return rule.substituteTo;
 		return null;
 	}
 
+	/**
+	 * a recursive function to check a stack of strings against any existing
+	 * rules and substitute according to any rules, recurses to check the stack
+	 * after a substitution
+	 *
+	 * @param grammarCheckStack
+	 */
 	public static void checkStack(Stack<String> grammarCheckStack) {
 		if (grammarCheckStack.size() == 0)
 			return;
@@ -40,7 +67,6 @@ public class GrammarRule {
 				token = grammarCheckStack.pop() + " " + token;
 			String sub = getSubstitute(token);
 			if (sub != null) {
-				System.out.println("Replacing " + token + " with " + sub);
 				grammarCheckStack.push(sub);
 				checkStack(grammarCheckStack);
 				return;

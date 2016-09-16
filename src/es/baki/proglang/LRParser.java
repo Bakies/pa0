@@ -24,17 +24,19 @@ public class LRParser {
 		}
 		GrammarRule currentRule = null;
 		while (grammarScanner.hasNext()) {
-			String grammarLine = grammarScanner.next();
+			String grammarLine = grammarScanner.nextLine();
 			if (grammarLine.startsWith("|")) {
 				if (currentRule == null) {
-					System.err.println("Trying to add to a null rule");
-					continue;
-				}
-				currentRule.addSearchString(grammarLine.substring(2));
-			} else if (grammarLine.split(" ")[1].equals("="))
-				currentRule = new GrammarRule(grammarLine.substring(0, grammarLine.indexOf('=') - 1),
-						grammarLine.substring(grammarLine.indexOf('=')).trim());
-			else
+					System.err.println("Trying to add to a null rule, valid grammar file?");
+					return;
+				} else
+					currentRule.addSearchString(grammarLine.substring(2));
+			} else if (grammarLine.matches("\\w* =.*")) {
+				String replace, with;
+				replace = grammarLine.substring(grammarLine.indexOf('=') + 1).trim();
+				with = grammarLine.substring(0, grammarLine.indexOf(' ')).trim();
+				currentRule = new GrammarRule(with, replace);
+			} else
 				System.err.println("Not sure how to handle this grammar line:\n" + grammarLine);
 
 		}
@@ -50,7 +52,7 @@ public class LRParser {
 			return;
 		}
 		Stack<String> grammarCheckStack = new Stack<>();
-		String stringToCheck = fileScanner.next();
+		String stringToCheck = fileScanner.nextLine();
 		String[] splitStringToCheck = stringToCheck.split(" ");
 
 		for (String token : splitStringToCheck) {
@@ -60,14 +62,13 @@ public class LRParser {
 
 		fileScanner.close();
 
-		if (grammarCheckStack.size() == 1 && grammarCheckStack.contains("S"))
+		if (grammarCheckStack.size() == 1)
 			System.out.println("Grammar Check Successful");
 		else {
-			System.out.println("Grammar Check Failed, resulting stack: ");
+			String output = "";
 			while (grammarCheckStack.size() != 0)
-				System.out.println(grammarCheckStack.pop());
+				output = grammarCheckStack.pop() + " " + output;
+			System.out.println("Grammar Check Failed, resulting stack: \n" + output);
 		}
-
 	}
-
 }

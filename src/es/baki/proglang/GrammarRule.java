@@ -6,8 +6,8 @@ import java.util.Stack;
 public class GrammarRule {
 	private static ArrayList<GrammarRule> rules = new ArrayList<>();
 
-	private final String substituteTo;
-	private ArrayList<String> substituteWith = new ArrayList<String>();
+	private final String replace;
+	private ArrayList<String> search = new ArrayList<String>();
 
 	/**
 	 * Make a new Grammar Rule with an initial substitute string and as many
@@ -17,9 +17,9 @@ public class GrammarRule {
 	 * @param search
 	 */
 	public GrammarRule(String substitute, String... search) {
-		this.substituteTo = substitute;
+		this.replace = substitute;
 		for (String s : search)
-			this.substituteWith.add(s);
+			this.search.add(s);
 		rules.add(this);
 	}
 
@@ -29,7 +29,7 @@ public class GrammarRule {
 	 * @param s
 	 */
 	public void addSearchString(String s) {
-		substituteWith.add(s);
+		search.add(s);
 	}
 
 	/**
@@ -42,10 +42,19 @@ public class GrammarRule {
 	 */
 	private static String getSubstitute(String s) {
 		for (GrammarRule rule : rules)
-			for (String search : rule.substituteWith)
+			for (String search : rule.search)
 				if (s.equals(search))
-					return rule.substituteTo;
+					return rule.replace;
 		return null;
+	}
+
+	/**
+	 * Get the list of all the grammar rules
+	 *
+	 * @return
+	 */
+	public static ArrayList<GrammarRule> getRules() {
+		return rules;
 	}
 
 	/**
@@ -55,7 +64,7 @@ public class GrammarRule {
 	 *
 	 * @param grammarCheckStack
 	 */
-	public static void checkStack(Stack<String> grammarCheckStack) {
+	public static void checkAndReplaceStack(Stack<String> grammarCheckStack) {
 		if (grammarCheckStack.size() == 0)
 			return;
 
@@ -68,11 +77,20 @@ public class GrammarRule {
 			String sub = getSubstitute(token);
 			if (sub != null) {
 				grammarCheckStack.push(sub);
-				checkStack(grammarCheckStack);
+				checkAndReplaceStack(grammarCheckStack);
 				return;
 			}
 		}
 		for (String s : token.split(" "))
 			grammarCheckStack.push(s);
+	}
+
+	/**
+	 * Returns the rule's replace string
+	 *
+	 * @return
+	 */
+	public String getReplacementString() {
+		return replace;
 	}
 }

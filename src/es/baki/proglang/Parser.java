@@ -64,15 +64,19 @@ public class Parser {
 
 		for (String token : splitStringToCheck) {
 			grammarCheckStack.push(token);
-			GrammarRule.checkStack(grammarCheckStack);
+			GrammarRule.checkAndReplaceStack(grammarCheckStack);
 		}
 
 		fileScanner.close();
 
 		if (grammarCheckStack.size() == 1) {
-			// TODO Check to see if this appears on the left side of an equal
-			// sign
-		} else
-			System.out.println("string is invalid!");
+			String token = grammarCheckStack.pop();
+			for (GrammarRule r : GrammarRule.getRules())
+				if (token.equals(r.getReplacementString())) {
+					System.out.println("string is valid!");
+					return;
+				}
+		}
+		System.out.println("string is invalid!");
 	}
 }
